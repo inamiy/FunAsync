@@ -7,8 +7,8 @@ final class AsyncFirstTests: XCTestCase
     {
         // NOTE: Using `try?` to ignore throwing-function part.
         let first = await asyncFirst([
-            { try? await makeAsync("1", sleep: 1, isSuccess: true) },
-            { try? await makeAsync("2", sleep: 2, isSuccess: true) }
+            { try? await makeAsync("1", sleep: sleepUnit, result: .success(1)) },
+            { try? await makeAsync("2", sleep: sleepUnit * 2, result: .success(2)) }
         ])()
 
         XCTAssertEqual(first, 1)
@@ -17,8 +17,8 @@ final class AsyncFirstTests: XCTestCase
     func testAsyncFirst_success() async throws
     {
         let first = try await asyncFirst([
-            { try await makeAsync("1", sleep: 1, isSuccess: true) },
-            { try await makeAsync("2", sleep: 2, isSuccess: true) }
+            { try await makeAsync("1", sleep: sleepUnit, result: .success(1)) },
+            { try await makeAsync("2", sleep: sleepUnit * 2, result: .success(2)) }
         ])()
 
         XCTAssertEqual(first, 1)
@@ -28,8 +28,8 @@ final class AsyncFirstTests: XCTestCase
     {
         do {
             _ = try await asyncFirst([
-                { try await makeAsync("1", sleep: 1, isSuccess: false) },
-                { try await makeAsync("2", sleep: 2, isSuccess: true) }
+                { try await makeAsync("1", sleep: sleepUnit, result: .failure(MyError())) },
+                { try await makeAsync("2", sleep: sleepUnit * 2, result: .success(2)) }
             ])()
 
             XCTFail("Should never reach here.")
@@ -53,10 +53,10 @@ final class AsyncFirstTests: XCTestCase
 
         do {
             _ = try await asyncFirst([
-                { try await makeAsync("1", sleep: 1, isSuccess: false) },
+                { try await makeAsync("1", sleep: sleepUnit, result: .failure(MyError())) },
                 {
                     try await withTaskCancellationHandler {
-                        try await makeAsync("2", sleep: 2, isSuccess: true)
+                        try await makeAsync("2", sleep: sleepUnit * 2, result: .success(2))
                     } onCancel: {
                         Task.init { await box.toggle() }
                     }

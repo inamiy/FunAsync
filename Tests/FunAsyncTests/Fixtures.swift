@@ -1,11 +1,12 @@
-func makeAsync(_ id: String, sleep: UInt64, isSuccess: Bool = true) async throws -> Int {
+func makeAsync<T>(_ id: String, sleep: UInt64, result: Result<T, Error>) async throws -> T {
     return try await withTaskCancellationHandler {
         debugLog("async \(id) start")
 
+        let loopCount: UInt64 = sleep / shortSleep
+
         // NOTE: for-loop for quick cancellation without too much sleep.
-        let _10ms: UInt64 = 10_000_000
-        for _ in 0 ... sleep * 10 {
-            await Task.sleep(_10ms)
+        for _ in 0 ... loopCount {
+            try await Task.sleep(nanoseconds: shortSleep)
 
             do {
                 try Task.checkCancellation()
@@ -15,17 +16,24 @@ func makeAsync(_ id: String, sleep: UInt64, isSuccess: Bool = true) async throws
             }
         }
 
-        if isSuccess {
+        switch result {
+        case let .success(value):
             debugLog("async \(id) succeeded")
-            return Int(sleep)
-        } else {
+            return value
+        case let .failure(error):
             debugLog("async \(id) failed")
-            throw MyError()
+            throw error
         }
+
     } onCancel: {
         debugLog("async \(id) onCancel")
     }
 }
+
+private let shortSleep: UInt64 = 10_000_000 // sleep per loop
+
+/// Recommended minimum sleep interval = 100 ms.
+let sleepUnit: UInt64 = shortSleep * 10
 
 struct MyError: Error, Equatable {}
 
