@@ -57,19 +57,16 @@ public func asyncFirst<A, B>(_ fs: [(A) async throws -> B]) -> (A) async throws 
     precondition(!fs.isEmpty, "asyncFirst error: async array is empty.")
 
     return { a in
-        try await asyncResultToAsyncThrows {
-            await withTaskGroup(of: Result<B, Error>.self) { group -> Result<B, Error> in
-                for f in fs {
-                    group.addTask {
-                        return await asyncThrowsToAsyncResult {
-                            try await f(a)
-                        }(())
-                    }
+        try await withThrowingTaskGroup(of: B.self) { group -> B in
+            for f in fs {
+                group.addTask {
+                    try await f(a)
                 }
-                let first = await group.next()!
-                group.cancelAll()
-                return first
             }
-        }(())
+
+            let first = try await group.next()!
+            group.cancelAll()
+            return first
+        }
     }
 }
