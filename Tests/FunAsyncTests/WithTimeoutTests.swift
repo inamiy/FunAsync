@@ -9,7 +9,7 @@ final class WithTimeoutTests: XCTestCase
             // 50ms timeout, 100ms task.
             let _ = try await withTimeout(nanoseconds: sleepUnit / 2) {
                 try? await makeAsync("1", sleep: sleepUnit, result: .success(1))
-            }
+            }()
 
             XCTFail("Should never reach here")
         }
@@ -24,7 +24,7 @@ final class WithTimeoutTests: XCTestCase
             // 200ms timeout, 100ms task.
             let value = try await withTimeout(nanoseconds: sleepUnit * 2) {
                 try? await makeAsync("1", sleep: sleepUnit, result: .success(1))
-            }
+            }()
 
             XCTAssertEqual(value, 1)
         }
