@@ -35,7 +35,10 @@ private let shortSleep: UInt64 = 10_000_000 // sleep per loop
 /// Recommended minimum sleep interval = 100 ms.
 let sleepUnit: UInt64 = shortSleep * 10
 
-struct MyError: Error, Equatable {}
+struct MyError: Error, Equatable
+{
+    var message: String = ""
+}
 
 private func debugLog(_ msg: Any) {
     print(msg)
