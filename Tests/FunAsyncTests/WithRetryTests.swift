@@ -16,7 +16,7 @@ final class WithRetryTests: XCTestCase
             else {
                 return try await makeAsync("\(count)", sleep: sleepUnit, result: .success(count))
             }
-        }
+        }()
 
         XCTAssertEqual(value, count)
     }
@@ -39,7 +39,7 @@ final class WithRetryTests: XCTestCase
                     return try await makeAsync("\(count)", sleep: sleepUnit, result: .success(count))
                 }
             }
-        )
+        )()
 
         XCTAssertEqual(value, count)
     }
