@@ -14,6 +14,18 @@ final class AsyncAllTests: XCTestCase
         XCTAssertEqual(values, [1, 2])
     }
 
+    func testNonThrowingAsyncAll2() async throws
+    {
+        // NOTE: Using `try?` to ignore throwing-function part.
+        let values = await asyncAll([
+            { try? await makeAsync("1", sleep: sleepUnit * 2, result: .success(1)) },
+            { try? await makeAsync("2", sleep: sleepUnit, result: .success(2)) }
+        ])()
+
+        XCTAssertEqual(values, [1, 2],
+                       "Should not affect order")
+    }
+
     func testAsyncAll_success() async throws
     {
         let values = try await asyncAll([
@@ -22,6 +34,17 @@ final class AsyncAllTests: XCTestCase
         ])()
 
         XCTAssertEqual(values, [1, 2])
+    }
+
+    func testAsyncAll_success2() async throws
+    {
+        let values = try await asyncAll([
+            { try await makeAsync("1", sleep: sleepUnit * 2, result: .success(1)) },
+            { try await makeAsync("2", sleep: sleepUnit, result: .success(2)) }
+        ])()
+
+        XCTAssertEqual(values, [1, 2],
+                       "Should not affect order")
     }
 
     func testAsyncAll_fail() async throws
