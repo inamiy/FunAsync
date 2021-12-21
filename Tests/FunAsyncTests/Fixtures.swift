@@ -40,6 +40,16 @@ struct MyError: Error, Equatable
     var message: String = ""
 }
 
+struct EqError: Error, Equatable
+{
+    let error: String
+
+    init(_ error: Error)
+    {
+        self.error = error.localizedDescription
+    }
+}
+
 private func debugLog(_ msg: Any) {
     print(msg)
 }
