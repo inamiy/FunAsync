@@ -9,6 +9,7 @@ Collection of Swift 5.5 `async`/`await` utility functions.
     - `asyncFirst` (`Promise.race`)
     - `asyncFirstSuccess` (`Promise.any`)
     - `asyncAll` (`Promise.all`)
+    - `asyncAllSettled` (`Promise.allSettled`)
     - `asyncOr` (sequential execution until first success)
     - `asyncStream` (from asyncs to `AsyncStream`)
     - `withRetry` (with customizability e.g. exponential backoff)
