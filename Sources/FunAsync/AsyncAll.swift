@@ -19,14 +19,17 @@ public func asyncAll<A, B>(_ fs: [(A) async -> B]) -> (A) async -> [B]
     precondition(!fs.isEmpty, "asyncAll error: async array is empty.")
 
     return { a in
-        await withTaskGroup(of: B.self) { group in
-            for f in fs {
+        await withTaskGroup(of: (Int, B).self) { group in
+            for (i, f) in fs.enumerated() {
                 group.addTask {
-                    await f(a)
+                    (i, await f(a))
                 }
             }
 
-            return await group.reduce(into: [], { $0.append($1) })
+            return await group
+                .reduce(into: [], { $0.append($1) })
+                .sorted(by: { $0.0 < $1.0 })
+                .map { $1 }
         }
     }
 }
@@ -52,14 +55,17 @@ public func asyncAll<A, B>(_ fs: [(A) async throws -> B]) -> (A) async throws ->
     precondition(!fs.isEmpty, "asyncAll error: async array is empty.")
 
     return { a in
-        try await withThrowingTaskGroup(of: B.self) { group in
-            for f in fs {
+        try await withThrowingTaskGroup(of: (Int, B).self) { group in
+            for (i, f) in fs.enumerated() {
                 group.addTask {
-                    try await f(a)
+                    (i, try await f(a))
                 }
             }
 
-            return try await group.reduce(into: [], { $0.append($1) })
+            return try await group
+                .reduce(into: [], { $0.append($1) })
+                .sorted(by: { $0.0 < $1.0 })
+                .map { $1 }
         }
     }
 }
