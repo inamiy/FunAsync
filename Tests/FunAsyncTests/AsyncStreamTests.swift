@@ -89,6 +89,25 @@ final class AsyncStreamTests: XCTestCase
         }
     }
 
+    func testAsyncStream_race_bothComplete() async throws
+    {
+        /// asyncStream should have `Task.select` semantics (https://github.com/apple/swift-async-algorithms/issues/109)
+        /// where the losing async tasks aren't cancelled on the first winner completing
+        let values = asyncStream([
+            { try await makeAsync("1", sleep: sleepUnit, result: .success(2)) },
+            { try await makeAsync("2", sleep: sleepUnit * 2, result: .success(3)) },
+        ])()
+
+        let expectBothValues = XCTestExpectation()
+        expectBothValues.assertForOverFulfill = true
+        expectBothValues.expectedFulfillmentCount = 2
+        for try await _ in values {
+            expectBothValues.fulfill()
+        }
+
+        wait(for: [expectBothValues], timeout: 1)
+    }
+
     func testAsyncStream_sibling_cancelling() async throws
     {
         actor Box {
